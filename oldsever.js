@@ -88,8 +88,6 @@ const distributeCommission = async (userId, depositAmount) => {
     let remainingAmount = depositAmount;
     let prevPercentage = 0;
 
-    
-
     while (currentUser.referredBy) {
       let parentUser = await User.findById(currentUser.referredBy);
       if (!parentUser) break;
@@ -100,17 +98,14 @@ const distributeCommission = async (userId, depositAmount) => {
       console.log(parentPercentage, difference);
       if (difference > 0) {
         let commission = (remainingAmount * difference) / 100;
+        parentUser.depositAmount = (parentUser.depositAmount || 0) + commission;
+        await parentUser.save();
 
-        console.log(commission, "commission ");
-        break
-        // parentUser.depositAmount = (parentUser.depositAmount || 0) + commission;
-        // await parentUser.save();
+        console.log(
+          `User ${parentUser._id} gets commission: ₹${commission} (${difference}%)`
+        );
 
-        // console.log(
-        //   `User ${parentUser._id} gets commission: ₹${commission} (${difference}%)`
-        // );
-
-        // remainingAmount -= commission; // Jo amount bacha, usme se kata jayega
+        remainingAmount -= commission; // Jo amount bacha, usme se kata jayega
       }
 
       prevPercentage = parentPercentage;
