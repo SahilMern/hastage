@@ -1,0 +1,25 @@
+mujhe node js ek application bana hai, jo lownline jaise hogi and usme user ek user database main pahle set hoga and uske kuch field hongi jaise name and jikso referd karega vo bhi dekhega kisse refferd rahega vo bhi and ek tag htag karke hogi vo jab user register karega uska referredBy leke to htag ki count badhegi 
+eg usermain jo db mai uska refferd leke kisi ne kiya to parent ka htag ki value incemrnet hogi samjho vo hierarchy mai ho to jitne usse releted parent hai sabka htag increment hoga and ek percenatge set ho buy defult har user ki 25% or ye percenatge according user ke badte rahe gi example 5 se jada log ko karta hai 30% hoga or uske hisab se aage badte rahega jaise direct mai agar  
+5 ko kiya 30%
+25 par 35%
+125 par 40%
+625 par 45%
+1000 par 50%
+2000 par 52.5
+4000 par 55%
+8000 par 57%
+12000 par 60%
+
+ek senorio samjho usermain hai jb mai set hai usne paach log ko reffer kiya 
+or uska htag ki value inecement hogi jitne ko reffer karega 5 ko karega to htag 5 hogi count and percentage hai vo uper jo diya hai uske accroding decidehogi 5 par 30% hogi baki upper meantion hai
+
+aab yaha ek percetage vise dirtibution karna hai jaise
+usermain jo hai user2 ko user3 ko user4 ko 5,6 ko refer kiya to uska htag increase hoga and percenatge 30% ho jayega jaisa bataya thoda
+
+uske neche wale ne kisi ko refer kiya to uska and uske jitne bhi upper honge sabka htag and percatge bhi badega and vo user ke under aaya to unska bhi percenatge direct or indirect se badega 
+direct:-  meanse user jisko direct reffer kar rah hai usse bhi percentage badega
+indirect:-  meanse user jisko indirect  reffer kar rah hai usse bhi percentage badega isme agar uske downline wale bhi reffer karenge to unke bhi wajah se usnka htag and percentage badega
+
+ab baat karte hai jab user ke downline koi amount deposite karega tab to uska parent mai bhi rahega uska percanteg kitna hai  uske hisab se vo 
+
+
