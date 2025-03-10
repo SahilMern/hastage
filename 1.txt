@@ -1,0 +1,15 @@
+mujhe nodejs mai ek downline system jaisa application bana hai jisme ek user sabko reffer kar sakta hai and jitne ko reffer karega uska percentage badega and 
+usme ek htag karke field hogi number mai uske downline mai jitne ko referr karega 
+utne baar hatg ki value incement hogi and htag ki value ke acoording uski commision percnatge bade gi
+ek user bydefault user db mai add rahega with name commison percntage and htag ki field ke sath and ye sari process user jab register hoga tab hogi and 
+last commison percentage 60% hai and jab koi kisi ka reffer lega to uske upper tak ka jo 10 level rahnge uske htag ko increment karega 
+
+iska start to end api bana ke do with node js application ke sath
+
+---------------------
+isme jo referralPercentage hai sirf last 60% tak he rahega
+isme aaisa hai samjho ek user hai usne 100 amount ya kitne bhi amount depite kiya
+to uska 60% sab yani ki uske upper wale parent mai distribute karna hai 
+eg:- user 4 usko user 3 ne refer kiya or user 3 ko user2 ne or usser1 ne
+aisa sirf example lo
+to jo bhi user 4 amount deposite karega uska 60% sab mai distribute karenge  
