@@ -14,92 +14,86 @@ mongoose
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => console.log("❌ Error in MongoDB connection:", err));
 
-app.use(express.json()); // Middleware to parse JSON requests
+app.use(express.json());
 
-// 🔥 Referral Percentage Update Logic
-const updateReferralPercentage = async (userId) => {
+// 🔥 Commission Distribution Logic (2 Levels)
+const distributeCommission = async (userId, depositAmount) => {
   try {
-    const user = await User.findById(userId);
-    if (!user) return;
+    let currentUser = await User.findById(userId).populate("referredBy");
+    if (!currentUser || !currentUser.referredBy) return;
 
-    let referralsCount = user.htag;
-    console.log(referralsCount, "refferalCount");
-    
-    if (referralsCount >= 12000) user.referralPercentage = 60;
-    else if (referralsCount >= 8000) user.referralPercentage = 57;
-    else if (referralsCount >= 4000) user.referralPercentage = 55;
-    else if (referralsCount >= 2000) user.referralPercentage = 52.5;
-    else if (referralsCount >= 1000) user.referralPercentage = 50;
-    else if (referralsCount >= 625) user.referralPercentage = 45;
-    else if (referralsCount >= 125) user.referralPercentage = 40;
-    else if (referralsCount >= 10) user.referralPercentage = 35;
-    else user.referralPercentage = 25;
+    let remainingAmount = (depositAmount * 60) / 100; // Total amount to be distributed (max 60%)
+    let prevPercentage = 0;
+    let level = 0;
+    let commissionLog = [];
 
-    await user.save();
-  } catch (error) {
-    console.error("❌ Error updating referral percentage:", error);
-  }
-};
+    while (currentUser.referredBy && level < 2) {
+      let parentUser = await User.findById(currentUser.referredBy);
+      if (!parentUser) break;
 
-// 🔥 Register First Main User (if not exists)
-const createMainUser = async () => {
-  const mainUser = await User.findOne({ email: "admin@example.com" });
-  if (!mainUser) {
-    const newUser = new User({ 
-      name: "Admin", 
-      email: "admin@example.com",
-      referralPercentage: 25 
-    });
-    await newUser.save();
-    console.log("✅ Main Admin User Created:", newUser);
-  }
-};
-createMainUser();
+      let parentPercentage = parentUser.referralPercentage;
+      let difference = Math.max(0, parentPercentage - prevPercentage);
 
-// 🔥 Register User API & Update htag for 10 Levels
-app.post("/register", async (req, res) => {
-  try {
-    const { name, email, referredById } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ message: "❌ Name and email are required" });
-    }
+      if (difference > 0) {
+        let commission = (remainingAmount * difference) / 100;
+        commission = Math.min(commission, remainingAmount); // Ensure we don't distribute more than 60%
 
-    let newUser = new User({ name, email });
+        // Parent को amount add करना
+        parentUser.depositAmount += commission;
+        await parentUser.save();
 
-    if (referredById) {
-      let referrer = await User.findById(referredById);
-      if (referrer) {
-        newUser.referredBy = referrer._id;
-        referrer.referrals.push(newUser._id);
-        await referrer.save();
+        // Log update करना
+        commissionLog.push({
+          parentId: parentUser._id,
+          received: commission,
+          remainingAfter: remainingAmount - commission,
+        });
 
-        let currentReferrer = referrer;
-        let level = 0;
-
-        while (currentReferrer && level < 10) {
-          currentReferrer.htag += 1;
-          await updateReferralPercentage(currentReferrer._id);
-          await currentReferrer.save();
-
-          if (currentReferrer.referredBy) {
-            currentReferrer = await User.findById(currentReferrer.referredBy);
-          } else {
-            break;
-          }
-          level++;
-        }
+        remainingAmount -= commission;
       }
+
+      prevPercentage = parentPercentage;
+      currentUser = parentUser;
+      level++;
     }
 
-    await newUser.save();
-    res.json({ message: "✅ User registered successfully", userId: newUser._id });
+    // अगर 60% पूरा distribute नहीं हुआ, तो log करें
+    if (remainingAmount > 0) {
+      console.log(`🛑 Remaining Amount Not Distributed: ₹${remainingAmount}`);
+    }
+
+    // Dummy field में log store करें
+    await User.findByIdAndUpdate(userId, { $set: { dummy: commissionLog } });
+
   } catch (error) {
-    console.error("❌ Error in registration:", error);
+    console.error("❌ Error in commission distribution:", error);
+  }
+};
+
+// 🔥 Deposit API
+app.post("/deposit", async (req, res) => {
+  try {
+    const { userId, amount } = req.body;
+    if (!userId || !amount || amount <= 0) {
+      return res.status(400).json({ message: "❌ Invalid deposit amount or user ID" });
+    }
+
+    let user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "❌ User not found" });
+
+    user.depositAmount += amount;
+    await user.save();
+
+    // Commission Distribution Call
+    await distributeCommission(userId, amount);
+
+    res.json({ message: "✅ Deposit successful", newBalance: user.depositAmount });
+  } catch (error) {
+    console.error("❌ Error in deposit:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-
-
+// ✅ Test Route
 app.get("/", (req, res) => res.send("🚀 Referral System API Running! 🚀"));
 app.listen(port, () => console.log(`🔥 Server running on port ${port}!`));

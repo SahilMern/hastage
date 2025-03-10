@@ -13,3 +13,20 @@ to uska 60% sab yani ki uske upper wale parent mai distribute karna hai
 eg:- user 4 usko user 3 ne refer kiya or user 3 ko user2 ne or usser1 ne
 aisa sirf example lo
 to jo bhi user 4 amount deposite karega uska 60% sab mai distribute karenge  
+
+--------------------------------------------------
+isme ek logic aad karna hai jisme ek children user jo hoga vo kuch amount deposite karege eg100
+hume iska 60% uske parent mai jitne log hai sabme distribute karna hai
+eg user4 ho hai usko 3 ne reffer kiya tha or user 2 hai usko user1 ne reffer kiya to jab user4 deposite karega to uss amount ka 60% uske upper wale parent mai distribute karna hoga accroding unke parent ki referralPercentage kitne hai samjho example deta hu
+
+user 4 ne depsoite kiya 100 to iska jo parent hai yani samjho user3 uska referralPercentage  hai 25 to ye is amount ka 25% kaat lega fhir uske jo rahega 35 to ye user apne children ka yani user3 ka referralPercentage kitan hai dekhega uska tha 25% to user4 and user3 ka comapre user3 - user4 
+means 35% -25% bacha5% to user 4 ke 100 mai se 5% katege or fhir ye uske upper jayega user2 ke pass fhir user3 ka dekhe referralPercentage  kitna hai fhir differnec nikalenge and jitna aaya user4 ke 100% se kaat lega aisa he flow chalte rahega jab tak user ke amount ka 60% cut nahi jata 
+
+and kabhi kabhi parent ka parentage kam ho sakta hai diffence mai - aa sakta hai to usse bhi handle kar dena and jo bhi profile aayega vo dummy mai set kar dena and ye sirf user ke 2 level tak karna matalb
+
+user4 depsite kiya to uske upper ke do parent ka he commison milega and uske upper wale ko nahi milega and 
+
+-------------------------------
+aap remaing amount ka percenatge nikal rahe ho but yaha aisa hai jaise usne 120 kiya to jab user ko distritubte hoga to har total ka perctange cut na ki reamaning ka 
+samjho 120 deposite kiya jab user1 ko commison jayega to uska jitna refferalpercenatge ho utana katega 120 ke percantge 
+
