@@ -1,10 +1,24 @@
+const mongoose = require("mongoose");
 
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+  referrals: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  htag: { type: Number, default: 0 }, // Total downline count
+  referralPercentage: { type: Number, default: 25 }, // Default 25%
+  depositAmount: { type: Number, default: 0 }, // Total deposited balance
+  dummy: { type: Array, default: [] } // Store commission logs
+});
+
+const User = mongoose.model("User", userSchema);
+module.exports = User;
 
 console.log("🚀 JAI SHREE RAM JI / JAI BAJARANG BALI JI 🚀");
 
 const express = require("express");
 const mongoose = require("mongoose");
-const User = require("./models/today.scehma");
+const User = require("./models/new.schema");
 
 const app = express();
 const port = 9080;
@@ -25,7 +39,7 @@ const updateReferralPercentage = async (userId) => {
     if (!user) return;
 
     let referralsCount = user.htag;
-    console.log(referralsCount, "referralCount");
+    console.log(referralsCount, "refferalCount");
     
     if (referralsCount >= 12000) user.referralPercentage = 60;
     else if (referralsCount >= 8000) user.referralPercentage = 57;
@@ -56,7 +70,7 @@ const createMainUser = async () => {
     console.log("✅ Main Admin User Created:", newUser);
   }
 };
-// createMainUser();
+createMainUser();
 
 // 🔥 Register User API & Update htag for 10 Levels
 app.post("/register", async (req, res) => {
@@ -101,49 +115,17 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// 🔥 Deposit API - Distribute Commission
-const distributeCommission = async (userId, depositAmount) => {
-  let user = await User.findById(userId);
-  if (!user) return;
-  
-  let remainingAmount = depositAmount * 0.6;
-  let currentReferrer = user.referredBy ? await User.findById(user.referredBy) : null;
-  let prevPercentage = 0;
 
-  while (currentReferrer && remainingAmount > 0) {
-    let percentageDiff = Math.max(currentReferrer.referralPercentage - prevPercentage, 0);
-    let commission = (depositAmount * percentageDiff) / 100;
-    
-    if (commission > remainingAmount) commission = remainingAmount;
-    
-    currentReferrer.dummy.push({ from: userId, amount: commission });
-    await currentReferrer.save();
-    
-    remainingAmount -= commission;
-    prevPercentage = currentReferrer.referralPercentage;
-    currentReferrer = currentReferrer.referredBy ? await User.findById(currentReferrer.referredBy) : null;
-  }
-};
-
-app.post("/deposit", async (req, res) => {
-  try {
-    const { userId, amount } = req.body;
-    if (!userId || !amount) return res.status(400).json({ message: "❌ User ID and amount are required" });
-    
-    let user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "❌ User not found" });
-    
-    user.depositAmount += amount;
-    await user.save();
-    
-    await distributeCommission(userId, amount);
-    
-    res.json({ message: "✅ Deposit successful and commission distributed" });
-  } catch (error) {
-    console.error("❌ Error in deposit:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
 
 app.get("/", (req, res) => res.send("🚀 Referral System API Running! 🚀"));
 app.listen(port, () => console.log(`🔥 Server running on port ${port}!`));
+
+yaha mai chahat hu ek user kuch amount deposite kare and us amount jo perentage hai sabme kate or uske parent mai distribute ho jaye amount pertage kate har baar naki remaing ka kate 
+
+eg:- samjho ek user hai user4 to usko user3 ne reffer kiya tha use user2 ne and usse1 
+to user4 jab register karega to usak deposite amount ka jaise 120 hai uska 305 jo bhi fhir dusra user aaye uske jitna rahega 5% to 120 ka 5 
+
+but yaha ek chezz hai commison pertage ki kisko lena hai ye aise decide hoga jaise
+
+samjho user4 usne deposite kiya user3 uska parent hai to uska jitna percantage hai vo amount ka lelega and agar uske kuch nahi raha to ye remaining amount karke function call hoga
+or gara useke upper koi raha to jaise user2 to user3 or user2 ke bech mai differnce dekhega kitna hai samjho user2 hai 30% and user3 hai 25% to 5% differnec aaya to user4 ka deposite mai se amount kaaat lega lekin ek limit tak 60% he katega sab jaise user3 ne liye 25% and user2 ne liya 5% aisa 60% se jadaa nahi jana chaiye 
